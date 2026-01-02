@@ -26,6 +26,7 @@ jobs:
       CCACHE_HARDLINK: "true"
       CCACHE_DIR: /home/runner/.ccache
       CCACHE_MAXSIZE: 8G
+      MAKE_ARGS: "LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- CC=clang LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS_PERF+=-O3"
     strategy:
       fail-fast: false
     name: Build Kernel for K40GE
@@ -41,7 +42,9 @@ jobs:
           remove-codeql: 'true'
 
       - name: Install Package
-        run: sudo apt update && sudo apt install -y p7zip-full git ccache
+        run: |
+          sudo apt update
+          sudo apt install -y p7zip-full git ccache build-essential flex bison libssl-dev libelf-dev bc python3
 
       - name: Restore ccache
         uses: actions/cache@v4
@@ -95,14 +98,14 @@ jobs:
       
       - name: Build Kernel for K40GE
         working-directory: kernel
-        env:
-          args: |+
-            LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
-            CROSS_COMPILE_ARM32=arm-linux-gnueabi- CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
-            CC=clang LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS_PERF+=-O3
         run: |
           export PATH=/usr/lib/ccache:$GITHUB_WORKSPACE/toolchain/bin:$PATH
-              make -j$(nproc --all) ${args} ares_defconfig all          - name: Apply KernelPatch for KPM KPM     if: ${{ inputs.enable_feature_kpm }}m }}     working-directory: kernel/out/arch/arm64/bootboot     run: |
+          make -j$(nproc --all) ${MAKE_ARGS} ares_defconfig all
+
+      - name: Apply KernelPatch for KPM
+        if: ${{ inputs.enable_feature_kpm }}
+        working-directory: kernel/out/arch/arm64/boot
+        run: |
           cp $GITHUB_WORKSPACE/sukisu_patch/kpm/patch_linux .
           chmod +x patch_linux
           ./patch_linux
