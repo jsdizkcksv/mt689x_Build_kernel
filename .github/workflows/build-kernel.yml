@@ -11,11 +11,11 @@ on:
       SOURCECODE_BRANCH:
         description: '源码分支名称或修订版'
         required: true
-        default: 'U-dev'
+        default: 'HyperOS-stable'
       SUKISU_BRANCH:
         description: 'SukiSU 分支名称或修订版'
         required: true
-        default: 'builtin'
+        default: 'nongki'
 
 jobs:
   build:
@@ -56,7 +56,7 @@ jobs:
       - name: Get Kernel Source Code
         uses: actions/checkout@v5
         with:
-          repository: MerCuJerry/android_kernel_aresin
+          repository: MTK6893/mt6893
           ref: ${{ inputs.SOURCECODE_BRANCH }}
           path: kernel
       
@@ -73,7 +73,7 @@ jobs:
         run: |
           echo DATE=$(date +%F) >> $GITHUB_ENV
           export BRANCH=${{ inputs.SUKISU_BRANCH }}
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s $BRANCH
+          curl -LSs "https://raw.githubusercontent.com/zzh20188/SukiSU-Ultra/main/kernel/setup.sh" | bash -s $BRANCH
           cd ./KernelSU
           export KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 40000 "-" 2815)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
@@ -103,12 +103,7 @@ jobs:
         run: |
           export KBUILD_BUILD_TIMESTAMP=$(date)
           export PATH=/usr/lib/ccache:$GITHUB_WORKSPACE/toolchain/bin:$PATH
-          make -j$(nproc --all) ${args} ares_user_defconfig all
-      
-      - name: Apply KernelPatch for KPM
-        if: ${{ inputs.enable_feature_kpm }}
-        working-directory: kernel/out/arch/arm64/boot
-        run: |
+              make -j$(nproc --all) ${args} ares_defconfig all          - name: Apply KernelPatch for KPM KPM     if: ${{ inputs.enable_feature_kpm }}m }}     working-directory: kernel/out/arch/arm64/bootboot     run: |
           cp $GITHUB_WORKSPACE/sukisu_patch/kpm/patch_linux .
           chmod +x patch_linux
           ./patch_linux
