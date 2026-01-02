@@ -101,7 +101,6 @@ jobs:
             CROSS_COMPILE_ARM32=arm-linux-gnueabi- CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
             CC=clang LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS_PERF+=-O3
         run: |
-          export KBUILD_BUILD_TIMESTAMP=$(date)
           export PATH=/usr/lib/ccache:$GITHUB_WORKSPACE/toolchain/bin:$PATH
               make -j$(nproc --all) ${args} ares_defconfig all          - name: Apply KernelPatch for KPM KPM     if: ${{ inputs.enable_feature_kpm }}m }}     working-directory: kernel/out/arch/arm64/bootboot     run: |
           cp $GITHUB_WORKSPACE/sukisu_patch/kpm/patch_linux .
